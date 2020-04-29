@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="css/html5reset.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <title>SI630 Project</title>
+</head>
+
+<body>
+
+<main>
+
+<h1> Introduction </h1>
+
+<p>
+	One of the problems for social media is that some users take advantage of their anonymity and make inappropriate remarks, which significantly destroy other users' experience. Given the tremendous amount of information produced each day, social media platforms must implement machine learning algorithms to filter out offensive remarks and insults that target certain individuals/groups. However, it's difficult to find every insulting remarks. While it's easy to find the shorter ones with explicit profanity, longer sentences that makes implicit attacks are more difficult to detect.
+</p>
+
+<p>
+	This project aims to implement some of the most common text classification algorithms. For example, Naive Bayes (aka NB) and Logistic Regression (aka LR) are implemented, as well as more sophisticated Neural Network methods. I hope that this project can help the persons or organizations who are studying text classification algorithms. Social media platforms, for example, might gain some inspiration from this project.
+</p>
+
+<p>
+	Simple methods, such as NB and LR, can reached a baseline f1-score of about 0.60 without pre-processing. I'm currently using pre-processed different words as tokens, and the f1-score of NB and LR can be improved to about 0.65. For Long short-term memory (aka LSTM), its f1-score can be further improved to 0.75, and its accuracy can reach 0.93.
+</p>
+
+<h1>Data</h1>
+<p>
+	The data is from codalab, from the competition OffensEval 2020. It contains tweets that are labelled in different dimensions, including: offensive/not offensive, targeted insult/untargeted insult, Individual Offended/Group Offended/Other. I'm mainly utilizing the first part of the dataset to study different classification algorithms.
+</p>
+
+<p>
+	<a href="https://competitions.codalab.org/competitions/22917">You can find the description of the competition from this link. </a>
+
+	Currently, the top rankings in the competition have an f1-score of about 0.8. In my experiment, I have reached an f1-score of 0.75, which I think is satisfactory.
+</p>
+
+
+<p>
+	<img src="dist.png" alt="The distribution of classes">
+</p>
+
+
+<p> In the data-set, each row corresponds to a tweet, which contains tweet id and text, the average evaluated possibility of being offensive, and the standard deviation of the possibility. The possibilities and the deviations are calculated by algorithms developed by the organizers. For example, here are some randomly selected tweets. 
+</p>
+
+<table>
+	<th>Tweet Id</th>
+    <th>Text</th>
+	<th>Rate Avg. </th>
+    <th>Rate Std. </th>
+
+	<tr>
+		<td>'1159535691728072704'</td>
+		<td>'@USER @USER Full of energy'</td>
+		<td>'0.34036496405604627'</td>
+		<td>'0.24866228211190125'</td>
+	</tr>
+
+	<tr>
+		<td>'1159535717107867648'</td>
+		<td>"City of star's, are you shining just for me? \#LALALAND"</td>
+		<td>'0.1691586600488356'</td>
+		<td>'0.18264453051536975'</td>
+	</tr>
+
+	<tr>
+		<td>'1159536014668419073'</td>
+		<td>'Absolute silence leads to sadness. It is the image of death.'</td>
+		<td>'0.4389209569209914'</td>
+		<td>'0.08702695703269699'</td>
+	</tr>
+
+	<tr>
+		<td>'1159536115411537928'</td>
+		<td>"@USER I hope they'll do another one for the last season"</td>
+		<td>'0.15913752389521013'</td>
+		<td>'0.1900078213012225'</td>
+	</tr>
+</table>
+
+
+<h1>Methods</h1>
+
+<p>
+	<a href="https://github.com/HantaoZhao/si630project">You can find my code on Github. I think it will be much easier to understand the methodology part if you have a look on my code. There are too much code to show on this html page.</a>
+</p>
+
+<p>
+	First, for pre-processing part, I converted the tsv files to more machine-friendly formats, and deleted the useless information. Each tweet is given together with its id, which makes little use in this project, therefore I deleted it. Also, the average evaluated possibility of being offensive are given in the format of float number in range (0,1), therefore I converted all the numbers less than 0.5 to become 0, and all the numbers larger than 0.5 to become 1. The float numbers are deleted as well. This is how I got the first copy of training set. Meanwhile, I created the second copy by removing the stop-words using nltk library. Since the text is from Twitter, I also modified some @USER, hashtag notations and emojis. I trained two models on these two copies of training sets to see the effect of pre-processing.
+</p>
+
+<p>
+	Next, I applied NB and LR methods to the data. For NB, I adjusted the alpha value to see how it changes the Accuracy, Precision and Recall value. For LR, I adjusted the iteration number and learning rate to see whether the models have converged, and how Accuracy, Precision and Recall value changes.
+</p>
+
+<p>
+	I implemented the LSTM model based on Keras. It's a neural network with one hidden layer. I used ReLu as the activation function for the first layer, and sigmoid for the output layer. After multiple experiments, I found that an dropout of 0.5 works well.
+</p>
+
+<h1>Results and Discussions</h1>
+
+
+
+
+
+<p>
+
+The dataset is biased. About 83.5% of the tweets are not offensive. Therefore, if we constantly predict that the test set to be inoffensive, we can reach 85.5% accuracy. In contrast, LSTM can reach accuracy higher than 93%. This is the plot of precision, recall and f1-score for Naive Bayes. The x axis is alpha, which is in the range of (0,0.1), with 100 steps.
+
+
+<img src="NB.png" alt="Results for NB">
+</p>
+
+<p>
+As we can see, the Recall is very high. It's about 0.99. However, the Precision is relatively low, and it's about 0.45. The low precision results in a low f1-score.  
+
+As for Logistic Regression, the F1-score is also about 0.65. I set the iteration numbers to be 1000, and tried different learning rates.
+</p>
+<table>
+	<th>Learning Rate</th>
+    <th>Precision </th>
+	<th>Recall </th>
+    <th>F1-Score </th>
+
+    <tr>
+		<td>5e-4</td>
+		<td>0.477</td>
+		<td>0.997</td>
+		<td>0.645</td>
+    </tr>
+
+        <tr>
+		<td>5e-5</td>
+		<td>0.482</td>
+		<td>0.999 </td>
+		<td>0.650 </td>
+    </tr>
+
+        <tr>
+		<td>5e-6</td>
+		<td>0.196</td>
+		<td>0.999</td>
+		<td>0.328 </td>
+    </tr>
+</table>
+
+<p> Clearly, the model has not converged when the learning rate is 5e^-6. The other two cases indicate that the model has a f1 score of about 0.65.
+</p>
+
+<p>
+As for LSTM, I planned to plot a ROC-AUC curve, but it's difficult to train multiple model because the training takes quite long time. I chose three different dropout rates to see the influence of hyperparameters. It seems that it's reasonable to set dropout rate to be 0.5. This is the structure of my LSTM model.
+</p>
+
+<p>
+	<img src="rnn.png" alt="The structure of LSTM">
+</p>
+
+<table>
+	<th>Dropout Rate</th>
+    <th>Precision </th>
+	<th>Recall </th>
+    <th>F1-Score </th>
+    <th>Accuracy </th>
+
+    <tr>
+		<td>0.3</td>
+		<td> 0.966</td>
+		<td>0.623</td>
+		<td>0.757</td>
+		<td>0.934</td>
+    </tr>
+
+        <tr>
+		<td>0.5</td>
+		<td>0.938</td>
+		<td>0.645 </td>
+		<td>0.765  </td>
+		<td>0.934</td>
+    </tr>
+
+        <tr>
+		<td>0.6</td>
+		<td>0.934</td>
+		<td>0.623</td>
+		<td>0.747 </td>
+		<td>0.932</td>
+    </tr>
+</table>
+
+<h1>What’s Next</h1>
+<p>
+	I trained my models on my old-fashioned Laptop. For LR and NB, the time spent in training is acceptable. However, for LSTM, it takes quite some time to converge. Therefore, I had to limit the size of the training set. If I could train my model on another platform (on the cloud or on an up-to-date PC, for example), I can explore the effects of other possible hyper-parameters and different structures. This is what I'm planning to do in future.
+</p>
+
+</main>
+
+
+</body>
+
+<footer>
+	<h3> Hantao Zhao &copy; 2020 </h3>
+</footer>
+
+</body>
+</html>
